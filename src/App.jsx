@@ -10,6 +10,7 @@ import NumResults from './components/NumResults';
 import Search from './components/Search';
 import WatchedMoviesList from './components/WatchedMoviesList';
 import WatchedSummary from './components/WatchedSummary';
+import ErrorMessage from './components/ErrorMessage';
 
 const tempMovieData = [
   {
@@ -64,6 +65,7 @@ export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(function () {
     // ===== we can use fetch method to fetch all the movies ====
@@ -73,11 +75,18 @@ export default function App() {
 
     // ==== we can use async await also ====
     async function fetchMovies() {
-      setIsLoading(true)
-      const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
+      try {setIsLoading(true)
+      const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`);
+
+      if (!res.ok) throw new Error("Something wen wrong while fetching movies");
+
       const data = await res.json();
       setMovies(data.Search);
-      setIsLoading(false);
+      setIsLoading(false); }
+      catch (err) {
+        console.error(err.message);
+        setError(err.message);
+      }
     }
     fetchMovies();
   }, []);
@@ -92,7 +101,10 @@ export default function App() {
 
       <Main>
         <Box>
-          {isLoading ? <Loader /> : <MovieList movies={movies} />}
+          {/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
+          {isLoading && <Loader />}
+          {!isLoading && !error && <MovieList movies={movies} />}
+          {error && <ErrorMessage message={error} />}
         </Box>
 
         <Box>
