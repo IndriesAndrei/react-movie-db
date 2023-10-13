@@ -1,14 +1,15 @@
 import './App.css'
-import { useState } from 'react';
-import NavBar from './components/NavBar';
-import Main from './components/Main';
-import Logo from './components/Logo';
-import Search from './components/Search';
-import NumResults from './components/NumResults';
-import MovieList from './components/MovieList';
-import WatchedSummary from './components/WatchedSummary';
-import WatchedMoviesList from './components/WatchedMoviesList';
+import { useEffect, useState } from 'react';
 import Box from './components/Box';
+import Loader from './components/Loader';
+import Logo from './components/Logo';
+import Main from './components/Main';
+import MovieList from './components/MovieList';
+import NavBar from './components/NavBar';
+import NumResults from './components/NumResults';
+import Search from './components/Search';
+import WatchedMoviesList from './components/WatchedMoviesList';
+import WatchedSummary from './components/WatchedSummary';
 
 const tempMovieData = [
   {
@@ -57,9 +58,29 @@ const tempWatchedData = [
   },
 ];
 
+const KEY = '3c5a332b';
+
 export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
   const [watched, setWatched] = useState(tempWatchedData);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(function () {
+    // ===== we can use fetch method to fetch all the movies ====
+    // fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
+    //   .then((res) => res.json)
+    //   .then((data) => setMovies(data.Search));
+
+    // ==== we can use async await also ====
+    async function fetchMovies() {
+      setIsLoading(true)
+      const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=interstellar`)
+      const data = await res.json();
+      setMovies(data.Search);
+      setIsLoading(false);
+    }
+    fetchMovies();
+  }, []);
 
   return (
     <>
@@ -71,7 +92,7 @@ export default function App() {
 
       <Main>
         <Box>
-          <MovieList movies={movies} />
+          {isLoading ? <Loader /> : <MovieList movies={movies} />}
         </Box>
 
         <Box>
