@@ -65,10 +65,16 @@ const KEY = '3c5a332b';
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [selectedId, setSelectedId] = useState(null);
+  
+  // const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(function() {
+    // get the values from localStorage with the saved key name
+    const storedValue = localStorage.getItem('watched');
+    return JSON.parse(storedValue);
+  })
 
   function handleSelectMovie(id) {
     setSelectedId(selectedId => id === selectedId ? null : id);
@@ -85,6 +91,11 @@ export default function App() {
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter(movie => movie.imdbID !== id));
   }
+
+  useEffect(function() {
+    // localStorage (key->value pairs available on the browser)
+    localStorage.setItem('watched', JSON.stringify(watched));
+  }, [watched]);
   
   useEffect(function () {
     const controller = new AbortController();
@@ -123,7 +134,8 @@ export default function App() {
       setError('');
       return;
     }
-
+    
+    handleCloseMovie();
     fetchMovies();
 
     // cleanup function
