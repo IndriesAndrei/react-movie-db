@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import StarRating from './StarRating';
 import Loader from "./Loader";
 const KEY = '3c5a332b';
@@ -7,6 +7,14 @@ export default function SelectedMovie({selectedId, onCloseMovie, onAddWatched, w
     const [movie, setMovie] = useState({});
     const [isLoading, setIsLoading] = useState(false);
     const [userRating, setUserRating] = useState('');
+
+    // refs are persistent across renders, but it will not make re-render on update, so we don't use them in JSX
+    const countRef = useRef(0);
+
+    useEffect(function() {
+        // each time, the userRating is changed, we want to increase the current countRef
+        if (userRating) countRef.current = countRef.current + 1;
+    }, [userRating]);
 
     const isWatched = watched.map(movie => movie.imdbID).includes(selectedId);
     const watchedUserRating = watched.find(movie => movie.imdbID === selectedId)?.userRating;
@@ -33,6 +41,7 @@ export default function SelectedMovie({selectedId, onCloseMovie, onAddWatched, w
             imdbRating: Number(imdbRating),
             runtime: Number(runtime.split(' ').at(0)),
             userRating,
+            countRatingDecisions: countRef.current,
         }
         onAddWatched(newWatchedMovie);
         onCloseMovie();
